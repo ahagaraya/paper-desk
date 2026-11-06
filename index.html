@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#07090d" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="ahagaraya paper desk. A personal paper-trading simulation. Live trading is off. This page cannot place orders." />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="paper desk" />
+<title>ahagaraya · paper desk</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="./site.webmanifest" />
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #07090d;
+    --raise: #101820;
+    --raise-2: #16202b;
+    --line: #243244;
+    --text: #e7eef6;
+    --muted: #8ea0b5;
+    --green: #3ddea0;
+    --green-dim: rgba(61, 222, 160, .12);
+    --red: #ff6b7a;
+    --red-dim: rgba(255, 107, 122, .12);
+    --amber: #f0c14a;
+    --amber-dim: rgba(240, 193, 74, .12);
+    --blue: #8eb6ff;
+    --blue-dim: rgba(142, 182, 255, .12);
+    --cyan: #7ee0d0;
+    --cyan-dim: rgba(126, 224, 208, .12);
+    --accent: var(--amber);
+    --mono: "DejaVu Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  body.source-fresh { --accent: var(--green); }
+  body.source-aging, body.source-stale, body.source-skew, body.source-unknown { --accent: var(--amber); }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+  }
+  body {
+    font-family: var(--mono);
+    min-height: 100vh;
+    padding:
+      calc(12px + env(safe-area-inset-top))
+      14px
+      calc(32px + env(safe-area-inset-bottom));
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 10px 0 12px;
+    background: linear-gradient(#07090d 70%, rgba(7, 9, 13, .92) 100%);
+  }
+  .brand { min-width: 0; }
+  .eyebrow {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  h1 {
+    margin: 2px 0 0;
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    padding: 5px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--raise);
+    color: var(--muted);
+  }
+  .badge.paper { color: var(--blue); background: var(--blue-dim); border-color: rgba(142, 182, 255, .4); }
+  .badge.sim { color: var(--cyan); background: var(--cyan-dim); border-color: rgba(126, 224, 208, .4); }
+  .badge.off { color: var(--text); border-color: #d7e2ee; background: #1b2633; }
+  .badge.on { color: var(--red); background: var(--red-dim); border-color: rgba(255, 107, 122, .5); }
+  .badge.ok { color: var(--green); background: var(--green-dim); border-color: rgba(61, 222, 160, .35); }
+  .badge.halt { color: var(--amber); background: var(--amber-dim); border-color: rgba(240, 193, 74, .45); }
+  .badge.flat { color: var(--muted); }
+  .badge.open { color: var(--green); background: var(--green-dim); border-color: rgba(61, 222, 160, .35); }
+  .banner {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    background: var(--raise);
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .hero, .card {
+    background: var(--raise);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .hero { position: relative; overflow: hidden; }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .k {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .equity {
+    margin: 6px 0 4px;
+    font-size: clamp(42px, 13vw, 68px);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: .95;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  @media (min-width: 720px) {
+    .hero-grid { grid-template-columns: 1.4fr .8fr .8fr; align-items: end; }
+  }
+  .figure { margin: 4px 0 0; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+  .figure.pos { color: var(--green); }
+  .figure.neg { color: var(--red); }
+  .sub { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  @media (min-width: 720px) {
+    .stats { grid-template-columns: repeat(4, 1fr); }
+  }
+  .stat {
+    background: var(--raise);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .stat .v { margin-top: 6px; font-size: 16px; font-weight: 700; }
+  .stat .v.pos { color: var(--green); }
+  .stat .v.neg { color: var(--red); }
+  .card h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .card h2 b { color: var(--text); font-weight: 700; }
+  .empty { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  .trade {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+  }
+  .token { font-weight: 700; letter-spacing: .03em; overflow-wrap: anywhere; }
+  .meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+  .pnl { font-weight: 700; text-align: right; }
+  .pnl.pos { color: var(--green); }
+  .pnl.neg { color: var(--red); }
+  .tag {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .tag.win { color: var(--green); background: var(--green-dim); }
+  .tag.loss { color: var(--red); background: var(--red-dim); }
+  .tag.flat { color: var(--muted); background: var(--raise-2); }
+  .risk {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+  }
+  .risk .v { margin-top: 6px; font-size: 15px; font-weight: 700; }
+  .roles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  @media (min-width: 720px) {
+    .roles { grid-template-columns: repeat(4, 1fr); }
+  }
+  .role {
+    background: var(--raise-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .role strong { display: block; font-size: 12px; letter-spacing: .04em; }
+  .role span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+  .fresh { display: grid; gap: 8px; }
+  .fresh div {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 12px;
+  }
+  .fresh b { font-weight: 700; }
+  .lvl.fresh { color: var(--green); }
+  .lvl.aging, .lvl.skew { color: var(--amber); }
+  .lvl.stale, .lvl.unknown { color: var(--amber); }
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <p class="eyebrow">ahagaraya</p>
+      <h1>Paper desk</h1>
+    </div>
+    <div class="badges" aria-label="Desk status">
+      <span class="badge paper" id="badge-mode">PAPER</span>
+      <span class="badge sim" id="badge-sim">SIMULATION</span>
+      <span class="badge off" id="badge-live">LIVE OFF</span>
+      <span class="badge flat" id="badge-book">FLAT</span>
+      <span class="badge ok" id="badge-halt">NO HALT</span>
+    </div>
+  </header>
+
+  <p class="banner" id="banner">Paper simulation snapshot. Live trading is off. This page cannot place orders.</p>
+  <noscript>
+    <p class="banner">JavaScript is off. The badges above are the paper simulation labels. Figures load with JavaScript from data.json.</p>
+  </noscript>
+
+  <section class="hero" aria-labelledby="equity-label">
+    <p class="k" id="equity-label">Equity</p>
+    <p class="equity" id="equity">—</p>
+    <div class="hero-grid">
+      <div>
+        <p class="k">PnL since $1,000</p>
+        <p class="figure" id="pnl">—</p>
+        <p class="sub" id="pnl-pct">Cumulative result from the $1,000 start. Not a midnight day figure.</p>
+      </div>
+      <div>
+        <p class="k">Cash</p>
+        <p class="figure" id="cash">—</p>
+        <p class="sub">Uninvested paper cash</p>
+      </div>
+      <div>
+        <p class="k">Open book</p>
+        <p class="figure" id="book-figure">—</p>
+        <p class="sub" id="book-sub">Positions in the snapshot</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="Summary">
+    <div class="stat"><div class="k">Realized</div><div class="v" id="realized">—</div></div>
+    <div class="stat"><div class="k">Unrealized</div><div class="v" id="unrealized">—</div></div>
+    <div class="stat"><div class="k">W / L</div><div class="v" id="wl">—</div></div>
+    <div class="stat"><div class="k">From peak</div><div class="v" id="dd">—</div></div>
+  </section>
+
+  <section class="card">
+    <h2>Open positions <b id="open-count">0</b></h2>
+    <div id="opens"></div>
+  </section>
+
+  <section class="card">
+    <h2>Recent closed trades <b id="close-count">0</b></h2>
+    <div id="closes"></div>
+  </section>
+
+  <section class="card">
+    <h2>Risk</h2>
+    <div class="risk">
+      <div><div class="k">Entries</div><div class="v" id="entries">—</div></div>
+      <div><div class="k">Closed trades</div><div class="v" id="closed">—</div></div>
+      <div><div class="k">Peak equity</div><div class="v" id="peak">—</div></div>
+      <div><div class="k">Max drawdown</div><div class="v" id="maxdd">—</div></div>
+    </div>
+    <p class="sub" id="reasons"></p>
+  </section>
+
+  <section class="card">
+    <h2>Desk roles</h2>
+    <div class="roles" id="roles"></div>
+  </section>
+
+  <section class="card">
+    <h2>Source freshness</h2>
+    <div class="fresh" id="fresh"></div>
+  </section>
+
+  <footer class="footer">
+    <div id="status">Waiting for the snapshot file.</div>
+    <div>paper-desk.v1 · sanitized paper metrics · refresh 30s</div>
+  </footer>
+
+<script type="application/json" id="fallback">
+{
+  "schema": "paper-desk.v1",
+  "mode": "paper",
+  "simulation": true,
+  "live": false,
+  "currency": "USD",
+  "starting_equity": 1000.0,
+  "equity": 997.340892,
+  "cash": 997.340892,
+  "pnl_since_start": -2.659108,
+  "pnl_since_start_pct": -0.2659,
+  "realized": -2.659108,
+  "unrealized": 0.0,
+  "wins": 2,
+  "losses": 2,
+  "closed_trades": 4,
+  "wl": "2/2",
+  "peak_equity": 1004.583077,
+  "drawdown_from_peak_pct": -0.7209,
+  "max_drawdown_pct": 0.8107,
+  "halt_new_entries": false,
+  "halt_reasons": [],
+  "book": "flat",
+  "open_count": 0,
+  "open": [],
+  "recent_closes": [
+    {
+      "token": "COGE",
+      "realized": 0.203712,
+      "outcome": "win",
+      "exits": [
+        "orchestrator_skip_reverse"
+      ],
+      "closed_at": null
+    },
+    {
+      "token": "AMD",
+      "realized": -4.761951,
+      "outcome": "loss",
+      "exits": [
+        "full_exit"
+      ],
+      "closed_at": null
+    },
+    {
+      "token": "401kinu",
+      "realized": 6.953192,
+      "outcome": "win",
+      "exits": [
+        "tp1_partial",
+        "trail_stop"
+      ],
+      "closed_at": null
+    },
+    {
+      "token": "KoriMu",
+      "realized": -5.054061,
+      "outcome": "loss",
+      "exits": [
+        "full_exit"
+      ],
+      "closed_at": null
+    }
+  ],
+  "agents": [
+    {
+      "id": "scanner",
+      "name": "Scanner",
+      "role": "pair search"
+    },
+    {
+      "id": "rugcheck",
+      "name": "RugCheck",
+      "role": "risk filter"
+    },
+    {
+      "id": "sizer",
+      "name": "Sizer",
+      "role": "position size"
+    },
+    {
+      "id": "executor",
+      "name": "Executor",
+      "role": "entries and exits"
+    },
+    {
+      "id": "equity",
+      "name": "Equity",
+      "role": "accounting and risk"
+    },
+    {
+      "id": "logger",
+      "name": "Logger",
+      "role": "records"
+    },
+    {
+      "id": "news",
+      "name": "News",
+      "role": "headlines and halt"
+    },
+    {
+      "id": "orchestrator",
+      "name": "Orchestrator",
+      "role": "coordination"
+    }
+  ],
+  "source_updated_at": "2026-11-07T00:32:38+03:00",
+  "source_age_at_publish_sec": 452,
+  "published_at": "2026-11-07T00:40:10+03:00",
+  "content_hash": "fdd59820240524eeec1a3079b35602c218123be8261ce9f43d65cce75e2e43f4",
+  "generated_by": "publish_data.py"
+}
+
+</script>
+<script>
+const ROLES = [
+  ["Scanner", "pair search"],
+  ["RugCheck", "risk filter"],
+  ["Sizer", "position size"],
+  ["Executor", "entries and exits"],
+  ["Equity", "accounting and risk"],
+  ["Logger", "records"],
+  ["News", "headlines and halt"],
+  ["Orchestrator", "coordination"]
+];
+const FRESH_SEC = 10 * 60;
+const AGING_SEC = 30 * 60;
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+}
+function money(value, signed) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "—";
+  const body = Math.abs(number).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  if (signed) {
+    if (number > 0) return "+$" + body;
+    if (number < 0) return "−$" + body;
+    return "$" + body;
+  }
+  return (number < 0 ? "−$" : "$") + body;
+}
+function pct(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "—";
+  const body = Math.abs(number).toFixed(2) + "%";
+  if (number > 0) return "+" + body;
+  if (number < 0) return "−" + body;
+  return body;
+}
+function px(value) {
+  const number = Number(value);
+  if (value == null || value === "" || !Number.isFinite(number)) return "—";
+  const digits = Math.abs(number) >= 1000 ? 2 : Math.abs(number) >= 1 ? 4 : 8;
+  return number.toLocaleString("en-US", { maximumFractionDigits: digits });
+}
+function tone(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number === 0) return "";
+  return number > 0 ? "pos" : "neg";
+}
+function setText(id, text, className) {
+  const node = document.getElementById(id);
+  node.textContent = text;
+  if (className != null) node.className = className;
+}
+function setBadge(id, text, kind) {
+  const node = document.getElementById(id);
+  node.textContent = text;
+  node.className = "badge " + kind;
+}
+function stamp(iso) {
+  if (typeof iso !== "string") return "—";
+  const match = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(Z|[+-]\d{2}:\d{2})$/);
+  if (!match) return iso;
+  let zone = "UTC";
+  if (match[3] !== "Z") {
+    const sign = match[3][0];
+    const hours = String(Number(match[3].slice(1, 3)));
+    const minutes = match[3].slice(4);
+    zone = "UTC" + sign + hours + (minutes === "00" ? "" : ":" + minutes);
+  }
+  return match[1] + " " + match[2] + " " + zone;
+}
+function ageOf(iso) {
+  const then = Date.parse(iso);
+  if (!Number.isFinite(then)) return { sec: null, text: "unknown", level: "unknown" };
+  const sec = Math.round((Date.now() - then) / 1000);
+  const abs = Math.abs(sec);
+  let text;
+  if (abs < 60) text = abs + "s";
+  else if (abs < 3600) text = Math.floor(abs / 60) + "m";
+  else if (abs < 172800) text = Math.floor(abs / 3600) + "h " + Math.floor((abs % 3600) / 60) + "m";
+  else text = Math.floor(abs / 86400) + "d";
+  if (sec < -120) return { sec, text: text + " ahead", level: "skew" };
+  let level = "stale";
+  if (sec < FRESH_SEC) level = "fresh";
+  else if (sec < AGING_SEC) level = "aging";
+  return { sec, text: text + " ago", level };
+}
+function levelWord(level) {
+  if (level === "fresh") return "FRESH";
+  if (level === "aging") return "AGING";
+  if (level === "skew") return "CLOCK";
+  if (level === "unknown") return "UNKNOWN";
+  return "STALE";
+}
+function freshRow(label, iso) {
+  const age = ageOf(iso);
+  const row = el("div");
+  row.append(el("span", null, label));
+  row.append(el("span", null, stamp(iso) + " · " + age.text));
+  row.append(el("b", "lvl " + age.level, levelWord(age.level)));
+  return { row, age };
+}
+
+let lastGood = null;
+
+function render(data, source) {
+  const paper = data.mode === "paper";
+  const simulation = data.simulation === true;
+  const live = data.live === true;
+  setBadge("badge-mode", paper ? "PAPER" : String(data.mode || "unknown").toUpperCase(), paper ? "paper" : "on");
+  setBadge("badge-sim", simulation ? "SIMULATION" : "NOT SIMULATION", simulation ? "sim" : "on");
+  setBadge("badge-live", live ? "LIVE ON" : "LIVE OFF", live ? "on" : "off");
+  setBadge("badge-book", data.book === "open" ? "OPEN" : "FLAT", data.book === "open" ? "open" : "flat");
+  setBadge("badge-halt", data.halt_new_entries ? "HALT" : "NO HALT", data.halt_new_entries ? "halt" : "ok");
+
+  setText("equity", money(data.equity, false), "equity");
+  setText("pnl", money(data.pnl_since_start, true) + "  " + pct(data.pnl_since_start_pct), "figure " + tone(data.pnl_since_start));
+  setText("cash", money(data.cash, false), "figure");
+  setText("book-figure", String(data.open_count ?? 0), "figure");
+  setText("realized", money(data.realized, true), "v " + tone(data.realized));
+  setText("unrealized", money(data.unrealized, true), "v " + tone(data.unrealized));
+  setText("wl", String(data.wl || "—"), "v");
+  setText("dd", pct(data.drawdown_from_peak_pct), "v " + tone(data.drawdown_from_peak_pct));
+  setText("entries", data.halt_new_entries ? "Halted" : "Not halted", "v");
+  setText("closed", String(data.closed_trades ?? "—"), "v");
+  setText("peak", money(data.peak_equity, false), "v");
+  setText("maxdd", data.max_drawdown_pct == null ? "—" : pct(Math.abs(Number(data.max_drawdown_pct))).replace("+", ""), "v");
+
+  const reasons = Array.isArray(data.halt_reasons) ? data.halt_reasons.filter(item => typeof item === "string") : [];
+  setText("reasons", reasons.length ? "Halt reasons: " + reasons.join("; ") : "No halt reasons in this snapshot.");
+
+  const opens = Array.isArray(data.open) ? data.open : [];
+  setText("open-count", String(opens.length));
+  const openRoot = document.getElementById("opens");
+  openRoot.replaceChildren();
+  if (!opens.length) {
+    openRoot.append(el("p", "empty", "No open positions. The book is flat."));
+  } else {
+    opens.forEach(row => {
+      const card = el("div", "trade");
+      const left = el("div");
+      left.append(el("div", "token", String(row.token || "unknown")));
+      left.append(el("div", "meta", "size " + money(row.size_usd, false) + " · entry " + px(row.entry) + " · mark " + px(row.mark)));
+      card.append(left, el("div", "pnl " + tone(row.unrealized), money(row.unrealized, true)));
+      openRoot.append(card);
+    });
+  }
+
+  const closes = Array.isArray(data.recent_closes) ? data.recent_closes : [];
+  setText("close-count", String(closes.length));
+  const closeRoot = document.getElementById("closes");
+  closeRoot.replaceChildren();
+  if (!closes.length) {
+    closeRoot.append(el("p", "empty", "No closed trades in this snapshot."));
+  } else {
+    closes.forEach(row => {
+      const card = el("div", "trade");
+      const left = el("div");
+      left.append(el("div", "token", String(row.token || "unknown")));
+      const outcome = row.outcome === "win" || row.outcome === "loss" || row.outcome === "flat" ? row.outcome : "flat";
+      const meta = el("div", "meta");
+      meta.append(el("span", "tag " + outcome, outcome));
+      meta.append(document.createTextNode((Array.isArray(row.exits) && row.exits.length) ? row.exits.join(", ") : "no exit label"));
+      left.append(meta);
+      card.append(left, el("div", "pnl " + tone(row.realized), money(row.realized, true)));
+      closeRoot.append(card);
+    });
+  }
+
+  const roleRoot = document.getElementById("roles");
+  roleRoot.replaceChildren();
+  ROLES.forEach(pair => {
+    const card = el("div", "role");
+    card.append(el("strong", null, pair[0]), el("span", null, pair[1]));
+    roleRoot.append(card);
+  });
+
+  const exported = freshRow("Export", data.published_at);
+  const sourced = freshRow("Source", data.source_updated_at);
+  const freshRoot = document.getElementById("fresh");
+  freshRoot.replaceChildren(exported.row, sourced.row);
+  const page = el("div");
+  page.append(el("span", null, "Page"));
+  page.append(el("span", null, source === "remote" ? "snapshot file loaded" : source === "held" ? "refresh failed, last file kept" : "cached snapshot shipped with this page"));
+  page.append(el("b", source === "remote" ? "lvl fresh" : "lvl aging", source === "remote" ? "LOADED" : "CACHED"));
+  freshRoot.append(page);
+
+  const worst = [exported.age.level, sourced.age.level].includes("stale")
+    ? "stale"
+    : [exported.age.level, sourced.age.level].includes("aging")
+      ? "aging"
+      : exported.age.level;
+  document.body.className = "source-" + worst;
+
+  let banner = "Recent paper snapshot. Live trading is off. This page cannot place orders.";
+  if (source === "fallback") {
+    banner = "Cached snapshot shipped with this page. data.json did not load. Not a market feed.";
+  } else if (source === "held") {
+    banner = "The latest refresh failed. Showing the last snapshot file. Not a market feed.";
+  } else if (live) {
+    banner = "The snapshot flag says live trading is on. This page still cannot place orders.";
+  } else if (!paper || !simulation) {
+    banner = "This snapshot is not marked as a paper simulation.";
+  } else if (worst === "stale" || worst === "unknown") {
+    banner = "Stale paper snapshot. These are the last published figures, not a market feed.";
+  } else if (worst === "aging" || worst === "skew") {
+    banner = "Aging paper snapshot. These are the last published figures, not a market feed.";
+  }
+  setText("banner", banner, "banner");
+  const status = source === "remote"
+    ? "Snapshot file loaded. This page asks again every 30 seconds."
+    : source === "held"
+      ? "Refresh failed. Showing the last loaded snapshot."
+      : "Cached snapshot. data.json is not available.";
+  setText("status", status);
+}
+
+function usable(data) {
+  return Boolean(data)
+    && data.schema === "paper-desk.v1"
+    && Number.isFinite(Number(data.equity))
+    && Number.isFinite(Number(data.pnl_since_start))
+    && typeof data.live === "boolean";
+}
+
+async function refresh() {
+  try {
+    const response = await fetch("./data.json?ts=" + Date.now(), { cache: "no-store" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const data = await response.json();
+    if (!usable(data)) throw new Error("snapshot shape");
+    lastGood = data;
+    render(data, "remote");
+  } catch (err) {
+    if (lastGood) render(lastGood, "held");
+    else render(fallback(), "fallback");
+  }
+}
+
+function fallback() {
+  try {
+    return JSON.parse(document.getElementById("fallback").textContent);
+  } catch (err) {
+    return {
+      schema: "paper-desk.v1",
+      mode: "paper",
+      simulation: true,
+      live: false,
+      equity: null,
+      cash: null,
+      pnl_since_start: null,
+      pnl_since_start_pct: null,
+      open: [],
+      recent_closes: [],
+      halt_new_entries: false,
+      halt_reasons: []
+    };
+  }
+}
+
+render(fallback(), "fallback");
+refresh();
+if (new URLSearchParams(location.search).get("once") !== "1") {
+  setInterval(refresh, 30000);
+}
+</script>
+</body>
+</html>

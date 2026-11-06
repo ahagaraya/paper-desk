@@ -1,0 +1,112 @@
+{
+  "schema": "paper-desk.v1",
+  "mode": "paper",
+  "simulation": true,
+  "live": false,
+  "currency": "USD",
+  "starting_equity": 1000.0,
+  "equity": 997.340892,
+  "cash": 997.340892,
+  "pnl_since_start": -2.659108,
+  "pnl_since_start_pct": -0.2659,
+  "realized": -2.659108,
+  "unrealized": 0.0,
+  "wins": 2,
+  "losses": 2,
+  "closed_trades": 4,
+  "wl": "2/2",
+  "peak_equity": 1004.583077,
+  "drawdown_from_peak_pct": -0.7209,
+  "max_drawdown_pct": 0.8107,
+  "halt_new_entries": false,
+  "halt_reasons": [],
+  "book": "flat",
+  "open_count": 0,
+  "open": [],
+  "recent_closes": [
+    {
+      "token": "COGE",
+      "realized": 0.203712,
+      "outcome": "win",
+      "exits": [
+        "orchestrator_skip_reverse"
+      ],
+      "closed_at": null
+    },
+    {
+      "token": "AMD",
+      "realized": -4.761951,
+      "outcome": "loss",
+      "exits": [
+        "full_exit"
+      ],
+      "closed_at": null
+    },
+    {
+      "token": "401kinu",
+      "realized": 6.953192,
+      "outcome": "win",
+      "exits": [
+        "tp1_partial",
+        "trail_stop"
+      ],
+      "closed_at": null
+    },
+    {
+      "token": "KoriMu",
+      "realized": -5.054061,
+      "outcome": "loss",
+      "exits": [
+        "full_exit"
+      ],
+      "closed_at": null
+    }
+  ],
+  "agents": [
+    {
+      "id": "scanner",
+      "name": "Scanner",
+      "role": "pair search"
+    },
+    {
+      "id": "rugcheck",
+      "name": "RugCheck",
+      "role": "risk filter"
+    },
+    {
+      "id": "sizer",
+      "name": "Sizer",
+      "role": "position size"
+    },
+    {
+      "id": "executor",
+      "name": "Executor",
+      "role": "entries and exits"
+    },
+    {
+      "id": "equity",
+      "name": "Equity",
+      "role": "accounting and risk"
+    },
+    {
+      "id": "logger",
+      "name": "Logger",
+      "role": "records"
+    },
+    {
+      "id": "news",
+      "name": "News",
+      "role": "headlines and halt"
+    },
+    {
+      "id": "orchestrator",
+      "name": "Orchestrator",
+      "role": "coordination"
+    }
+  ],
+  "source_updated_at": "2026-11-07T00:32:38+03:00",
+  "source_age_at_publish_sec": 452,
+  "published_at": "2026-11-07T00:40:10+03:00",
+  "content_hash": "fdd59820240524eeec1a3079b35602c218123be8261ce9f43d65cce75e2e43f4",
+  "generated_by": "publish_data.py"
+}

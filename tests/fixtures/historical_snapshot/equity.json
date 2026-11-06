@@ -1,0 +1,16 @@
+{
+  "mode": "paper",
+  "live": false,
+  "currency": "USD",
+  "cash": 997.340892,
+  "equity": 997.340892,
+  "realized_pnl": -2.659108,
+  "unrealized_pnl": 0.0,
+  "wins": 2,
+  "losses": 2,
+  "closed_trades": 4,
+  "peak_equity": 1004.583077,
+  "max_drawdown_pct": 0.8107,
+  "day_start_equity": 997.340892,
+  "updated_at": "2026-11-07T00:32:38+03:00"
+}
