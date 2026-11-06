@@ -105,8 +105,8 @@
     }
   ],
   "source_updated_at": "2026-11-07T01:38:47+03:00",
-  "source_age_at_publish_sec": 1258,
-  "published_at": "2026-11-07T01:59:45+03:00",
+  "source_age_at_publish_sec": 1633,
+  "published_at": "2026-11-07T02:06:00+03:00",
   "content_hash": "4f8a7a824eb5efb6d2c12731e0fe4c36d3c043c9f4eaacccc6461bc3c10bd20f",
   "generated_by": "publish_data.py"
 }
