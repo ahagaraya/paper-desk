@@ -1,0 +1,51 @@
+{
+  "mode": "paper",
+  "live": false,
+  "cash": 997.340892,
+  "equity_mtm": 997.340892,
+  "realized_pnl": -2.659108,
+  "unrealized_pnl": 0.0,
+  "wins": 2,
+  "losses": 2,
+  "closed_trades": 4,
+  "peak_equity": 1004.583077,
+  "peak_dd_pct": -99.0,
+  "max_drawdown_pct": 0.8107,
+  "day_start_equity": 997.340892,
+  "day_pnl_usd": 0,
+  "halt_new_entries": false,
+  "halt_reasons": [],
+  "orchestrator_call": "CLEAR_HALT",
+  "book": "flat",
+  "updated_at": "2026-11-07T00:32:38+03:00",
+  "closed_detail": [
+    {
+      "token": "KoriMu",
+      "realized": -5.054061,
+      "outcome": "loss",
+      "exits": ["full_exit"],
+      "position_id": "paper-KoriMu-2026-11-06T202807+0300"
+    },
+    {
+      "token": "401kinu",
+      "realized": 6.953192,
+      "outcome": "win",
+      "exits": ["tp1_partial", "trail_stop"],
+      "position_id": "paper-401kinu-2026-11-06T202807+0300"
+    },
+    {
+      "token": "AMD",
+      "realized": -4.761951,
+      "outcome": "loss",
+      "exits": ["full_exit"],
+      "position_id": "paper-AMD-2026-11-06T202807+0300"
+    },
+    {
+      "token": "COGE",
+      "realized": 0.203712,
+      "outcome": "win",
+      "exits": ["orchestrator_skip_reverse"],
+      "position_id": "paper-COGE-2026-11-07T003148+0300"
+    }
+  ]
+}
