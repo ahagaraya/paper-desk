@@ -5,25 +5,52 @@
   "live": false,
   "currency": "USD",
   "starting_equity": 1000.0,
-  "equity": 997.340892,
-  "cash": 997.340892,
-  "pnl_since_start": -2.659108,
-  "pnl_since_start_pct": -0.2659,
-  "realized": -2.659108,
+  "equity": 994.359205,
+  "cash": 994.359205,
+  "pnl_since_start": -5.640795,
+  "pnl_since_start_pct": -0.5641,
+  "realized": -5.640795,
   "unrealized": 0.0,
-  "wins": 2,
-  "losses": 2,
-  "closed_trades": 4,
-  "wl": "2/2",
+  "wins": 3,
+  "losses": 4,
+  "closed_trades": 7,
+  "wl": "3/4",
   "peak_equity": 1004.583077,
-  "drawdown_from_peak_pct": -0.7209,
-  "max_drawdown_pct": 0.8107,
+  "drawdown_from_peak_pct": -1.0177,
+  "max_drawdown_pct": 1.1488,
   "halt_new_entries": false,
   "halt_reasons": [],
   "book": "flat",
   "open_count": 0,
   "open": [],
   "recent_closes": [
+    {
+      "token": "BAGEL",
+      "realized": 0.518796,
+      "outcome": "win",
+      "exits": [
+        "time_stop"
+      ],
+      "closed_at": null
+    },
+    {
+      "token": "0DAY",
+      "realized": -1.29842,
+      "outcome": "loss",
+      "exits": [
+        "vol_collapse_exit"
+      ],
+      "closed_at": null
+    },
+    {
+      "token": "ROCCO",
+      "realized": -2.202063,
+      "outcome": "loss",
+      "exits": [
+        "hard_sl"
+      ],
+      "closed_at": null
+    },
     {
       "token": "COGE",
       "realized": 0.203712,
@@ -104,9 +131,9 @@
       "role": "coordination"
     }
   ],
-  "source_updated_at": "2026-11-07T03:32:35+03:00",
-  "source_age_at_publish_sec": 20173,
-  "published_at": "2026-11-07T09:08:48+03:00",
-  "content_hash": "7d65afcb57178157c6ce27f746bf6516dc408fefbd65ad6e835968d4a7fdd1ce",
+  "source_updated_at": "2026-11-07T11:15:03+03:00",
+  "source_age_at_publish_sec": 108,
+  "published_at": "2026-11-07T11:16:51+03:00",
+  "content_hash": "71e2bb0e5be3907aa4066ee014c09892abe09460782d4f6342fc5dcd40c25358",
   "generated_by": "publish_data.py"
 }
