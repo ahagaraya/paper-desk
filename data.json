@@ -5,18 +5,18 @@
   "live": false,
   "currency": "USD",
   "starting_equity": 1000.0,
-  "equity": 994.358497,
+  "equity": 994.142237,
   "cash": 984.419205,
-  "pnl_since_start": -5.641503,
-  "pnl_since_start_pct": -0.5642,
+  "pnl_since_start": -5.857763,
+  "pnl_since_start_pct": -0.5858,
   "realized": -5.640795,
-  "unrealized": -0.000708,
+  "unrealized": -0.216968,
   "wins": 3,
   "losses": 4,
   "closed_trades": 7,
   "wl": "3/4",
   "peak_equity": 1004.583077,
-  "drawdown_from_peak_pct": -1.0178,
+  "drawdown_from_peak_pct": -1.0393,
   "max_drawdown_pct": 1.1488,
   "halt_new_entries": false,
   "halt_reasons": [],
@@ -27,8 +27,8 @@
       "token": "COGE",
       "size_usd": 9.94,
       "entry": 0.009146651432,
-      "mark": 0.009146,
-      "unrealized": -0.000708,
+      "mark": 0.008947,
+      "unrealized": -0.216968,
       "opened_at": "2026-11-07T19:54:05+03:00",
       "risk_tier": "experimental_unverified",
       "unverified_risks": [
@@ -41,7 +41,7 @@
       "position_id": "paper-COGE-2026-11-07T195405+0300",
       "qty": 1086.736504,
       "remaining_cost_usd": 9.94,
-      "mark_at": "2026-11-07T21:19:44+03:00",
+      "mark_at": "2026-11-07T21:23:52+03:00",
       "mark_status": "fresh",
       "mark_source": "recorded_market_mark"
     }
@@ -154,9 +154,9 @@
       "role": "coordination"
     }
   ],
-  "source_updated_at": "2026-11-07T21:19:44+03:00",
-  "source_age_at_publish_sec": 232,
-  "published_at": "2026-11-07T21:23:36+03:00",
-  "content_hash": "6c7cc2bb04d8498b3f4e34732954ddbc261524dfacee006bc4d1f31eef12f38f",
+  "source_updated_at": "2026-11-07T21:20:20+03:00",
+  "source_age_at_publish_sec": 315,
+  "published_at": "2026-11-07T21:25:35+03:00",
+  "content_hash": "0ac514ebf02647535b862bad421cda5d82f023b30e759a43245649b2f891084e",
   "generated_by": "publish_data.py"
 }
