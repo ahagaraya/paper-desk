@@ -5,52 +5,30 @@
   "live": false,
   "currency": "USD",
   "starting_equity": 1000.0,
-  "equity": 994.799066,
-  "cash": 974.479205,
-  "pnl_since_start": -5.200934,
-  "pnl_since_start_pct": -0.5201,
-  "realized": -5.640795,
-  "unrealized": 0.43986,
-  "wins": 3,
+  "equity": 995.089058,
+  "cash": 984.939125,
+  "pnl_since_start": -4.910942,
+  "pnl_since_start_pct": -0.4911,
+  "realized": -5.120875,
+  "unrealized": 0.209933,
+  "wins": 4,
   "losses": 4,
-  "closed_trades": 7,
-  "wl": "3/4",
+  "closed_trades": 8,
+  "wl": "4/4",
   "peak_equity": 1004.583077,
-  "drawdown_from_peak_pct": -0.9739,
+  "drawdown_from_peak_pct": -0.9451,
   "max_drawdown_pct": 1.1488,
   "halt_new_entries": false,
   "halt_reasons": [],
   "book": "open",
-  "open_count": 2,
+  "open_count": 1,
   "open": [
-    {
-      "token": "COGE",
-      "size_usd": 9.94,
-      "entry": 0.009146651432,
-      "mark": 0.009555,
-      "unrealized": 0.443767,
-      "opened_at": "2026-11-07T19:54:05+03:00",
-      "risk_tier": "experimental_unverified",
-      "unverified_risks": [
-        "sell_execution_not_simulated",
-        "creator_history_incomplete"
-      ],
-      "position_pct": 1,
-      "evidence_at": "2026-11-07T19:53:57+03:00",
-      "batch_id": "exp_20261107T195044MSK",
-      "position_id": "paper-COGE-2026-11-07T195405+0300",
-      "qty": 1086.736504,
-      "remaining_cost_usd": 9.94,
-      "mark_at": "2026-11-07T21:50:36+03:00",
-      "mark_status": "fresh",
-      "mark_source": "recorded_market_mark"
-    },
     {
       "token": "ROCCO",
       "size_usd": 9.94,
       "entry": 0.000799514228,
-      "mark": 0.0007992,
-      "unrealized": -0.003907,
+      "mark": 0.0008164,
+      "unrealized": 0.209933,
       "opened_at": "2026-11-07T21:39:38+03:00",
       "risk_tier": "experimental_unverified",
       "unverified_risks": [
@@ -63,12 +41,21 @@
       "position_id": "paper-ROCCO-2026-11-07T213938+0300",
       "qty": 12432.54923,
       "remaining_cost_usd": 9.94,
-      "mark_at": "2026-11-07T21:50:36+03:00",
+      "mark_at": "2026-11-07T21:57:31+03:00",
       "mark_status": "fresh",
       "mark_source": "recorded_market_mark"
     }
   ],
   "recent_closes": [
+    {
+      "token": "COGE",
+      "realized": 0.51992,
+      "outcome": "win",
+      "exits": [
+        "time_stop"
+      ],
+      "closed_at": null
+    },
     {
       "token": "BAGEL",
       "realized": 0.518796,
@@ -176,9 +163,9 @@
       "role": "coordination"
     }
   ],
-  "source_updated_at": "2026-11-07T21:41:20+03:00",
-  "source_age_at_publish_sec": 594,
-  "published_at": "2026-11-07T21:51:14+03:00",
-  "content_hash": "0ab5578e85c392f991c66dc433193059d7160557f1438716065d9cfd7e5ebe88",
+  "source_updated_at": "2026-11-07T21:57:31+03:00",
+  "source_age_at_publish_sec": 154,
+  "published_at": "2026-11-07T22:00:05+03:00",
+  "content_hash": "f15fe81e2669cc839cf45be489adb768e0cedd84ddbec837b609bac28b37a4dd",
   "generated_by": "publish_data.py"
 }
