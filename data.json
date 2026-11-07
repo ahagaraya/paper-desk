@@ -104,9 +104,9 @@
       "role": "coordination"
     }
   ],
-  "source_updated_at": "2026-11-07T00:32:38+03:00",
-  "source_age_at_publish_sec": 452,
-  "published_at": "2026-11-07T00:40:10+03:00",
-  "content_hash": "fdd59820240524eeec1a3079b35602c218123be8261ce9f43d65cce75e2e43f4",
+  "source_updated_at": "2026-11-07T03:07:51+03:00",
+  "source_age_at_publish_sec": 1032,
+  "published_at": "2026-11-07T03:25:03+03:00",
+  "content_hash": "2b20b744891e307755ef88a69ebc45522c0e8aa93d91683868c1b446545cdb08",
   "generated_by": "publish_data.py"
 }
