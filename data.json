@@ -5,18 +5,18 @@
   "live": false,
   "currency": "USD",
   "starting_equity": 1000.0,
-  "equity": 994.553215,
+  "equity": 994.612892,
   "cash": 984.939125,
-  "pnl_since_start": -5.446785,
-  "pnl_since_start_pct": -0.5447,
+  "pnl_since_start": -5.387108,
+  "pnl_since_start_pct": -0.5387,
   "realized": -5.120875,
-  "unrealized": -0.32591,
+  "unrealized": -0.266233,
   "wins": 4,
   "losses": 4,
   "closed_trades": 8,
   "wl": "4/4",
   "peak_equity": 1004.583077,
-  "drawdown_from_peak_pct": -0.9984,
+  "drawdown_from_peak_pct": -0.9925,
   "max_drawdown_pct": 1.1488,
   "halt_new_entries": false,
   "halt_reasons": [],
@@ -27,8 +27,8 @@
       "token": "ROCCO",
       "size_usd": 9.94,
       "entry": 0.000799514228,
-      "mark": 0.0007733,
-      "unrealized": -0.32591,
+      "mark": 0.0007781,
+      "unrealized": -0.266233,
       "opened_at": "2026-11-07T21:39:38+03:00",
       "risk_tier": "experimental_unverified",
       "unverified_risks": [
@@ -41,7 +41,7 @@
       "position_id": "paper-ROCCO-2026-11-07T213938+0300",
       "qty": 12432.54923,
       "remaining_cost_usd": 9.94,
-      "mark_at": "2026-11-07T22:19:01+03:00",
+      "mark_at": "2026-11-07T22:21:28+03:00",
       "mark_status": "fresh",
       "mark_source": "recorded_market_mark"
     }
@@ -163,9 +163,9 @@
       "role": "coordination"
     }
   ],
-  "source_updated_at": "2026-11-07T21:58:29+03:00",
-  "source_age_at_publish_sec": 1276,
-  "published_at": "2026-11-07T22:19:45+03:00",
-  "content_hash": "b4f500aebb110af34071cdad3cab1af86559901389fa674637eeeab45a866106",
+  "source_updated_at": "2026-11-07T22:19:56+03:00",
+  "source_age_at_publish_sec": 301,
+  "published_at": "2026-11-07T22:24:57+03:00",
+  "content_hash": "8ca7dd0d78e31456626b40640ad32b4da7af5da2fbfa6ae4b2f4adb8fafc7ae1",
   "generated_by": "publish_data.py"
 }
