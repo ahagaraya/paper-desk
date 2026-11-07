@@ -5,48 +5,40 @@
   "live": false,
   "currency": "USD",
   "starting_equity": 1000.0,
-  "equity": 995.578901,
-  "cash": 984.939125,
-  "pnl_since_start": -4.421099,
-  "pnl_since_start_pct": -0.4421,
-  "realized": -5.120875,
-  "unrealized": 0.699776,
+  "equity": 992.008102,
+  "cash": 992.008102,
+  "pnl_since_start": -7.991898,
+  "pnl_since_start_pct": -0.7992,
+  "realized": -7.991898,
+  "unrealized": 0.0,
   "wins": 4,
-  "losses": 4,
-  "closed_trades": 8,
-  "wl": "4/4",
+  "losses": 5,
+  "closed_trades": 9,
+  "wl": "4/5",
   "peak_equity": 1004.583077,
-  "drawdown_from_peak_pct": -0.8963,
-  "max_drawdown_pct": 1.1488,
+  "drawdown_from_peak_pct": -1.2518,
+  "max_drawdown_pct": 1.2518,
   "halt_new_entries": false,
   "halt_reasons": [],
-  "book": "open",
-  "open_count": 1,
-  "open": [
+  "book": "flat",
+  "open_count": 0,
+  "open": [],
+  "recent_closes": [
     {
       "token": "ROCCO",
-      "size_usd": 9.94,
-      "entry": 0.000799514228,
-      "mark": 0.0008558,
-      "unrealized": 0.699776,
-      "opened_at": "2026-11-07T21:39:38+03:00",
+      "realized": -2.871023,
+      "outcome": "loss",
+      "exits": [
+        "hard_sl"
+      ],
+      "closed_at": null,
       "risk_tier": "experimental_unverified",
       "unverified_risks": [
         "sell_execution_not_simulated",
         "creator_history_incomplete"
       ],
-      "position_pct": 1,
-      "evidence_at": "2026-11-07T21:39:29+03:00",
-      "batch_id": "exp_20261107T213738MSK",
-      "position_id": "paper-ROCCO-2026-11-07T213938+0300",
-      "qty": 12432.54923,
-      "remaining_cost_usd": 9.94,
-      "mark_at": "2026-11-07T22:47:29+03:00",
-      "mark_status": "stale",
-      "mark_source": "recorded_market_mark"
-    }
-  ],
-  "recent_closes": [
+      "batch_id": "exp_20261107T213738MSK"
+    },
     {
       "token": "COGE",
       "realized": 0.51992,
@@ -163,9 +155,9 @@
       "role": "coordination"
     }
   ],
-  "source_updated_at": "2026-11-07T22:19:56+03:00",
-  "source_age_at_publish_sec": 1992,
-  "published_at": "2026-11-07T22:53:08+03:00",
-  "content_hash": "9ccddcdced8f4d582bfb669af73e5503fae90071c92ddd5a7cdeddbb21a27d04",
+  "source_updated_at": "2026-11-07T22:54:45+03:00",
+  "source_age_at_publish_sec": 221,
+  "published_at": "2026-11-07T22:58:26+03:00",
+  "content_hash": "1c7b2fb8de9f575d8613a2c61b501e7d16fae4dcad23fbd2f79b705228971927",
   "generated_by": "publish_data.py"
 }
