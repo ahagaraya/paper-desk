@@ -56,6 +56,9 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(doc["recent_closes"][0]["exits"], ["orchestrator_skip_reverse"])
         self.assertNotIn("position_id", json.dumps(doc))
         self.assertEqual(doc["agents"][-1]["name"], "Orchestrator")
+        self.assertEqual(doc["schema"], "paper-desk.v1")
+        self.assertNotIn("risk_tier", dump(doc))
+        self.assertNotIn("experimental_unverified", dump(doc))
         self.assertNotIn(FORBIDDEN_NAME, dump(doc))
         validate_public_snapshot(doc)
         self.assertEqual(doc["content_hash"], metrics_hash(doc))
@@ -277,9 +280,105 @@ class SnapshotTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 build_snapshot(state, now=PUBLISHED)
 
-    def test_committed_snapshot_matches_the_publisher(self) -> None:
-        expected = dump(build_snapshot(FIXTURE, now=PUBLISHED))
-        self.assertEqual((ROOT / "data.json").read_text(encoding="utf-8"), expected)
+    def test_host_snapshot_stays_valid_and_is_not_rebuilt_here(self) -> None:
+        original = (ROOT / "data.json").read_text(encoding="utf-8")
+        doc = json.loads(original)
+        validate_public_snapshot(doc)
+        self.assertFalse(doc["live"])
+        self.assertEqual(doc["mode"], "paper")
+        self.assertEqual(doc["pnl_since_start"], round(doc["equity"] - 1000, 6))
+        self.assertEqual((ROOT / "data.json").read_text(encoding="utf-8"), original)
+
+    def test_experimental_tier_is_kept_and_unlabeled_history_is_not(self) -> None:
+        state = ROOT / "tests" / "fixtures" / "experimental_tier"
+        doc = build_snapshot(state, now=datetime.fromisoformat("2026-11-07T03:15:00+03:00"))
+        self.assertEqual(doc["schema"], "paper-desk.v2")
+        self.assertFalse(doc["live"])
+        self.assertEqual(doc["realized"], -10)
+        self.assertEqual(doc["unrealized"], -2)
+        self.assertEqual(doc["pnl_since_start"], -10)
+        ordinary, experimental = doc["open"]
+        self.assertEqual(ordinary["token"], "ORDI")
+        self.assertEqual(ordinary["risk_tier"], "ordinary")
+        self.assertEqual(ordinary["position_pct"], 2)
+        self.assertNotIn("unverified_risks", ordinary)
+        self.assertEqual(experimental["risk_tier"], "experimental_unverified")
+        self.assertEqual(
+            experimental["unverified_risks"],
+            ["sell_execution_not_simulated", "creator_history_incomplete"],
+        )
+        self.assertEqual(experimental["position_pct"], 1)
+        self.assertEqual(experimental["unrealized"], -3)
+        self.assertEqual(
+            experimental["evidence_at"]["sell_execution_not_simulated"],
+            "2026-11-07T03:10:00+03:00",
+        )
+        self.assertEqual(experimental["evidence_at"]["wallet_trade"], "2026-11-07T03:12:30+03:00")
+        self.assertEqual(experimental["policy_id"], "paper-exp-1pct")
+        self.assertEqual(experimental["batch_id"], "batch-20261107")
+        old, plain = doc["recent_closes"]
+        self.assertEqual(plain["token"], "PLAIN")
+        self.assertNotIn("risk_tier", plain)
+        self.assertNotIn("position_pct", plain)
+        self.assertEqual(old["token"], "EXPTOLD")
+        self.assertEqual(old["realized"], -12)
+        self.assertEqual(old["risk_tier"], "experimental_unverified")
+        self.assertEqual(old["quote_observed_at"], "2026-11-07T02:40:00+03:00")
+        validate_public_snapshot(doc)
+
+    def test_tier_whitelist_drops_paths_urls_and_unknown_labels(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = Path(tmp)
+            _write(
+                state,
+                "equity.json",
+                {
+                    "equity": 1000,
+                    "cash": 900,
+                    "live": False,
+                    "mode": "paper",
+                    "realized_pnl": -5,
+                    "updated_at": "2026-11-07T03:12:30+03:00",
+                },
+            )
+            _write(
+                state,
+                "risk_status.json",
+                {
+                    "closed_detail": [
+                        {
+                            "token": "EXPTOLD",
+                            "realized": -5,
+                            "outcome": "loss",
+                            "exits": ["full_exit"],
+                            "risk_tier": "experimental_unverified",
+                            "unverified_risks": [
+                                "sell_execution_not_simulated",
+                                "see /workspace/trading-paper/state/run.log",
+                                "api_key=should-not-pass",
+                            ],
+                            "evidence_at": "/workspace/trading-paper/secret",
+                            "policy_id": "../../etc/passwd",
+                            "batch_id": "https://example.test/ghp_" + ("a" * 20),
+                        }
+                    ]
+                },
+            )
+            _write(state, "positions.json", {"open": []})
+            doc = build_snapshot(state, now=PUBLISHED)
+            encoded = dump(doc)
+            close = doc["recent_closes"][0]
+            self.assertEqual(close["risk_tier"], "experimental_unverified")
+            self.assertEqual(close["unverified_risks"], ["sell_execution_not_simulated"])
+            self.assertNotIn("evidence_at", close)
+            self.assertNotIn("policy_id", close)
+            self.assertNotIn("batch_id", close)
+            self.assertEqual(doc["realized"], -5)
+            self.assertNotIn("trading-paper", encoded)
+            self.assertNotIn("ghp_", encoded)
+            self.assertNotIn("api_key", encoded)
+            self.assertNotIn("passwd", encoded)
+            validate_public_snapshot(doc)
 
 
 if __name__ == "__main__":

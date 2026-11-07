@@ -223,6 +223,50 @@ class RenderTests(unittest.TestCase):
         self.assertNotIn(">NO HALT<", flat)
         self.assertEqual(doc["pnl_since_start"], 100.0)
 
+    def test_experimental_labels_on_desktop_and_mobile(self) -> None:
+        state = ROOT / "tests" / "fixtures" / "experimental_tier"
+        doc = build_snapshot(state, now=datetime.fromisoformat("2026-11-07T03:15:00+03:00"))
+        site_dir = SHOTS / "experimental-site"
+        if site_dir.exists():
+            shutil.rmtree(site_dir)
+        site_dir.mkdir(parents=True)
+        shutil.copy(ROOT / "index.html", site_dir / "index.html")
+        shutil.copy(ROOT / "favicon.svg", site_dir / "favicon.svg")
+        shutil.copy(ROOT / "site.webmanifest", site_dir / "site.webmanifest")
+        (site_dir / "data.json").write_text(dump(doc), encoding="utf-8")
+        server = Server(site_dir)
+        try:
+            desktop = chrome(server.url, 1280, 1560, SHOTS / "paper_desk_experimental_desktop.png")
+            mobile = chrome(server.url, 390, 2480, SHOTS / "paper_desk_experimental_mobile.png")
+        finally:
+            server.close()
+        for dom in (desktop, mobile):
+            flat = compact(dom)
+            self.assertIn(">EXPERIMENTAL<", flat)
+            self.assertIn(">SALE NOT SIMULATED<", flat)
+            self.assertIn(">CREATOR HISTORY INCOMPLETE<", flat)
+            self.assertIn(">ORDINARY<", flat)
+            self.assertIn("1% equity", flat)
+            self.assertIn("2% equity", flat)
+            self.assertIn("EXPTOLD", flat)
+            self.assertIn("−$12.00", flat)
+            self.assertIn("−$3.00", flat)
+            self.assertIn("−$10.00", flat)
+            self.assertIn(">LIVE OFF<", flat)
+            self.assertIn(">PAPER<", flat)
+            self.assertIn(">SIMULATION<", flat)
+            self.assertIn("not a safety guarantee", flat)
+            self.assertIn("not a safety pass", flat)
+            self.assertNotIn(">PASS<", flat)
+            self.assertNotIn(">SAFE<", flat)
+            closes = flat.split('id="closes"', 1)[1].split("<h2>Risk", 1)[0]
+            plain_card = closes.split(">PLAIN<", 1)[1]
+            self.assertNotIn("EXPERIMENTAL", plain_card)
+            self.assertNotIn("SALE NOT SIMULATED", plain_card)
+            self.assertNotIn("CREATOR HISTORY INCOMPLETE", plain_card)
+        self.assertEqual(png_size(SHOTS / "paper_desk_experimental_desktop.png")[0], 1280)
+        self.assertEqual(png_size(SHOTS / "paper_desk_experimental_mobile.png")[0], 390)
+
 
 if __name__ == "__main__":
     unittest.main()

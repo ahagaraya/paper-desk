@@ -206,6 +206,14 @@
   .tag.win { color: var(--green); background: var(--green-dim); }
   .tag.loss { color: var(--red); background: var(--red-dim); }
   .tag.flat { color: var(--muted); background: var(--raise-2); }
+  .tag.experimental {
+    color: var(--amber);
+    background: var(--amber-dim);
+    border: 1px solid rgba(240, 193, 74, .55);
+  }
+  .tag.ordinary, .tag.pct { color: var(--text); border: 1px solid var(--line); }
+  .risk-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .trade.experimental { box-shadow: inset 3px 0 0 var(--amber); padding-left: 8px; }
   .risk {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -322,6 +330,8 @@
       <div><div class="k">Max drawdown</div><div class="v" id="maxdd">—</div></div>
     </div>
     <p class="sub" id="reasons"></p>
+    <p class="sub" id="tier-note">Wallet-trade and quote proxies are limited measurements, not a safety guarantee. An experimental paper entry is 1% of equity, with sale execution not simulated and creator history incomplete. The ordinary fully verified tier stays 2% of equity. A green win is paper PnL, not a safety pass. Rows with no tier label stay unlabeled.</p>
+    <p class="sub" id="tier-counts"></p>
   </section>
 
   <section class="card">
@@ -336,7 +346,7 @@
 
   <footer class="footer">
     <div id="status">Waiting for the snapshot file.</div>
-    <div>paper-desk.v1 · sanitized paper metrics · refresh 30s</div>
+    <div id="schema-line">sanitized paper metrics · refresh 30s</div>
   </footer>
 
 <script type="application/json" id="fallback">
@@ -564,6 +574,97 @@ function freshRow(label, iso) {
 
 let lastGood = null;
 
+const RISK_LABELS = {
+  sell_execution_not_simulated: "SALE NOT SIMULATED",
+  creator_history_incomplete: "CREATOR HISTORY INCOMPLETE"
+};
+const EVIDENCE_LABELS = {
+  sell_execution_not_simulated: "sale evidence",
+  creator_history_incomplete: "creator evidence",
+  quote: "quote observed",
+  wallet_trade: "wallet-trade observed"
+};
+
+function riskBadges(row) {
+  const wrap = el("div", "risk-badges");
+  if (row.risk_tier === "experimental_unverified") {
+    wrap.append(el("span", "tag experimental", "EXPERIMENTAL"));
+    wrap.append(el("span", "tag experimental", "SALE NOT SIMULATED"));
+    wrap.append(el("span", "tag experimental", "CREATOR HISTORY INCOMPLETE"));
+  } else if (row.risk_tier === "ordinary") {
+    wrap.append(el("span", "tag ordinary", "ORDINARY"));
+  }
+  if (Array.isArray(row.unverified_risks) && row.risk_tier !== "experimental_unverified") {
+    row.unverified_risks.forEach(code => {
+      if (RISK_LABELS[code]) wrap.append(el("span", "tag experimental", RISK_LABELS[code]));
+    });
+  }
+  const pct = Number(row.position_pct);
+  if (row.position_pct != null && Number.isFinite(pct)) {
+    wrap.append(el("span", "tag pct", pct + "% equity"));
+  }
+  return wrap;
+}
+
+function evidenceLine(row) {
+  const parts = [];
+  const evidence = row.evidence_at;
+  if (evidence && typeof evidence === "object") {
+    Object.keys(EVIDENCE_LABELS).forEach(key => {
+      if (typeof evidence[key] === "string") parts.push(EVIDENCE_LABELS[key] + " " + evidence[key]);
+    });
+  } else if (typeof evidence === "string") {
+    parts.push("evidence " + evidence);
+  }
+  if (typeof row.quote_observed_at === "string") parts.push("quote observed " + row.quote_observed_at);
+  if (typeof row.wallet_trade_observed_at === "string") parts.push("wallet-trade observed " + row.wallet_trade_observed_at);
+  if (typeof row.policy_id === "string") parts.push("policy " + row.policy_id);
+  if (typeof row.batch_id === "string") parts.push("batch " + row.batch_id);
+  return parts.join(" · ");
+}
+
+function renderTrade(row, pnlKey) {
+  const card = el("div", row.risk_tier === "experimental_unverified" ? "trade experimental" : "trade");
+  const left = el("div");
+  left.append(el("div", "token", String(row.token || "unknown")));
+  if (pnlKey === "unrealized") {
+    left.append(el("div", "meta", "size " + money(row.size_usd, false) + " · entry " + px(row.entry) + " · mark " + px(row.mark)));
+  } else {
+    const outcome = row.outcome === "win" || row.outcome === "loss" || row.outcome === "flat" ? row.outcome : "flat";
+    const meta = el("div", "meta");
+    meta.append(el("span", "tag " + outcome, outcome));
+    meta.append(document.createTextNode((Array.isArray(row.exits) && row.exits.length) ? row.exits.join(", ") : "no exit label"));
+    left.append(meta);
+  }
+  const badges = riskBadges(row);
+  if (badges.childNodes.length) left.append(badges);
+  const evidence = evidenceLine(row);
+  if (evidence) left.append(el("div", "meta", evidence));
+  card.append(left, el("div", "pnl " + tone(row[pnlKey]), money(row[pnlKey], true)));
+  return card;
+}
+
+function tierSummary(opens, closes) {
+  const rows = opens.concat(closes);
+  let experimental = 0;
+  let ordinary = 0;
+  rows.forEach(row => {
+    if (row.risk_tier === "experimental_unverified") experimental += 1;
+    else if (row.risk_tier === "ordinary") ordinary += 1;
+  });
+  if (experimental + ordinary === 0) return "";
+  const unlabeled = rows.length - experimental - ordinary;
+  let text = "Labeled rows in this snapshot: experimental " + experimental
+    + ", ordinary " + ordinary + ", unlabeled " + unlabeled + ".";
+  const expCloses = closes.filter(row => row.risk_tier === "experimental_unverified");
+  if (expCloses.length) {
+    const sum = expCloses.reduce((total, row) => total + Number(row.realized || 0), 0);
+    text += " Experimental realized inside these closes: " + money(sum, true) + ".";
+  }
+  text += " Headline realized and PnL include every tier, so an experimental loss stays in the total.";
+  return text;
+}
+
 function render(data, source) {
   const paper = data.mode === "paper";
   const simulation = data.simulation === true;
@@ -591,41 +692,24 @@ function render(data, source) {
   setText("reasons", reasons.length ? "Halt reasons: " + reasons.join("; ") : "No halt reasons in this snapshot.");
 
   const opens = Array.isArray(data.open) ? data.open : [];
+  const closes = Array.isArray(data.recent_closes) ? data.recent_closes : [];
+  setText("tier-counts", tierSummary(opens, closes));
   setText("open-count", String(opens.length));
   const openRoot = document.getElementById("opens");
   openRoot.replaceChildren();
   if (!opens.length) {
     openRoot.append(el("p", "empty", "No open positions. The book is flat."));
   } else {
-    opens.forEach(row => {
-      const card = el("div", "trade");
-      const left = el("div");
-      left.append(el("div", "token", String(row.token || "unknown")));
-      left.append(el("div", "meta", "size " + money(row.size_usd, false) + " · entry " + px(row.entry) + " · mark " + px(row.mark)));
-      card.append(left, el("div", "pnl " + tone(row.unrealized), money(row.unrealized, true)));
-      openRoot.append(card);
-    });
+    opens.forEach(row => openRoot.append(renderTrade(row, "unrealized")));
   }
 
-  const closes = Array.isArray(data.recent_closes) ? data.recent_closes : [];
   setText("close-count", String(closes.length));
   const closeRoot = document.getElementById("closes");
   closeRoot.replaceChildren();
   if (!closes.length) {
     closeRoot.append(el("p", "empty", "No closed trades in this snapshot."));
   } else {
-    closes.forEach(row => {
-      const card = el("div", "trade");
-      const left = el("div");
-      left.append(el("div", "token", String(row.token || "unknown")));
-      const outcome = row.outcome === "win" || row.outcome === "loss" || row.outcome === "flat" ? row.outcome : "flat";
-      const meta = el("div", "meta");
-      meta.append(el("span", "tag " + outcome, outcome));
-      meta.append(document.createTextNode((Array.isArray(row.exits) && row.exits.length) ? row.exits.join(", ") : "no exit label"));
-      left.append(meta);
-      card.append(left, el("div", "pnl " + tone(row.realized), money(row.realized, true)));
-      closeRoot.append(card);
-    });
+    closes.forEach(row => closeRoot.append(renderTrade(row, "realized")));
   }
 
   const roleRoot = document.getElementById("roles");
@@ -674,11 +758,12 @@ function render(data, source) {
       ? "Refresh failed. Showing the last loaded snapshot."
       : "Cached snapshot. data.json is not available.";
   setText("status", status);
+  setText("schema-line", (data.schema || "paper-desk") + " · sanitized paper metrics · refresh 30s");
 }
 
 function usable(data) {
   return Boolean(data)
-    && data.schema === "paper-desk.v1"
+    && (data.schema === "paper-desk.v1" || data.schema === "paper-desk.v2")
     && Number.isFinite(Number(data.equity))
     && Number.isFinite(Number(data.pnl_since_start))
     && typeof data.live === "boolean";

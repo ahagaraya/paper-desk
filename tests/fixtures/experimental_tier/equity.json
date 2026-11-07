@@ -1,0 +1,15 @@
+{
+  "mode": "paper",
+  "live": false,
+  "currency": "USD",
+  "cash": 400,
+  "equity": 990,
+  "realized_pnl": -10,
+  "unrealized_pnl": -2,
+  "wins": 1,
+  "losses": 1,
+  "closed_trades": 2,
+  "peak_equity": 1004,
+  "max_drawdown_pct": 1.4,
+  "updated_at": "2026-11-07T03:12:30+03:00"
+}

@@ -1,0 +1,25 @@
+{
+  "mode": "paper",
+  "live": false,
+  "halt_new_entries": false,
+  "halt_reasons": [],
+  "closed_detail": [
+    {
+      "token": "PLAIN",
+      "realized": 2,
+      "outcome": "win",
+      "exits": ["full_exit"]
+    },
+    {
+      "token": "EXPTOLD",
+      "realized": -12,
+      "outcome": "loss",
+      "exits": ["full_exit"],
+      "risk_tier": "experimental_unverified",
+      "unverified_risks": ["sell_execution_not_simulated", "creator_history_incomplete"],
+      "position_pct": 1,
+      "quote_observed_at": "2026-11-07T02:40:00+03:00",
+      "wallet_trade_observed_at": "2026-11-07T02:41:00+03:00"
+    }
+  ]
+}
