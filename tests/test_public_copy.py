@@ -47,6 +47,10 @@ class PublicCopyTests(unittest.TestCase):
         self.assertNotIn("meta http-equiv=\"refresh\"", html)
         self.assertIn("ahagaraya", html)
         self.assertNotIn("file://", html)
+        self.assertIn("not a safety guarantee", html)
+        self.assertIn("sale execution not simulated", html)
+        self.assertIn("creator history incomplete", html)
+        self.assertIn("not a safety pass", html)
 
     def test_embedded_fallback_is_a_valid_paper_snapshot(self) -> None:
         html = (ROOT / "index.html").read_text(encoding="utf-8")
@@ -61,8 +65,9 @@ class PublicCopyTests(unittest.TestCase):
         self.assertFalse(doc["live"])
         self.assertTrue(doc["simulation"])
         self.assertEqual(doc["mode"], "paper")
-        self.assertEqual(doc, json.loads((ROOT / "data.json").read_text(encoding="utf-8")))
         self.assertNotIn("day_pnl", doc)
+        self.assertTrue(all("risk_tier" not in row for row in doc["open"]))
+        self.assertTrue(all("risk_tier" not in row for row in doc["recent_closes"]))
 
 
 if __name__ == "__main__":
