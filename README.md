@@ -4,7 +4,9 @@ Personal paper-trading simulation dashboard. Static files only: `index.html` and
 
 The badges **PAPER**, **SIMULATION**, and **LIVE OFF** describe the book. If a future snapshot ever carries `live: true`, the page shows **LIVE ON** and still cannot send orders.
 
-`data.json` in this repository is a sanitized historical snapshot (published `2026-11-07T00:40:10+03:00`). It was imported and passed through `publish_data.py`. It is not a later reading of the paper host. The trading state directory was not available when this copy was prepared. The page marks an old export as aging or stale instead of presenting it as a market feed.
+`data.json` is the sanitized snapshot published by the paper host. Code changes do not replace that file with an older fixture. The page marks an old export as aging or stale instead of presenting it as a market feed.
+
+An experimental paper tier, when a row is labeled `experimental_unverified`, is 1% of equity with sale execution not simulated and creator history incomplete. The ordinary fully verified tier stays 2% of equity. The publisher copies those labels only from the row that carries them. It does not invent a tier for older closes, and it does not change trading configuration. Wallet-trade and quote times are limited measurements, not a safety guarantee. Headline PnL and realized stay the full book, experimental losses included.
 
 PnL is **cumulative since $1,000**. It is equity minus that fixed start. It is not the midnight day figure, which can reset to zero while the account is still away from $1,000.
 

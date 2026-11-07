@@ -1,0 +1,33 @@
+{
+  "open": [
+    {
+      "token": "ORDI",
+      "size_usd": 20,
+      "entry_price": 1,
+      "mark": 1.05,
+      "unrealized_pnl": 1,
+      "opened_at": "2026-11-07T02:00:00+03:00",
+      "risk_tier": "ordinary",
+      "position_pct": 2
+    },
+    {
+      "token": "EXPT",
+      "size_usd": 9.9,
+      "entry_price": 0.5,
+      "mark": 0.35,
+      "unrealized_pnl": -3,
+      "opened_at": "2026-11-07T03:00:00+03:00",
+      "risk_tier": "experimental_unverified",
+      "unverified_risks": ["sell_execution_not_simulated", "creator_history_incomplete"],
+      "position_pct": 1,
+      "evidence_at": {
+        "sell_execution_not_simulated": "2026-11-07T03:10:00+03:00",
+        "creator_history_incomplete": "2026-11-07T03:11:00+03:00",
+        "quote": "2026-11-07T03:12:00+03:00",
+        "wallet_trade": "2026-11-07T03:12:30+03:00"
+      },
+      "policy_id": "paper-exp-1pct",
+      "batch_id": "batch-20261107"
+    }
+  ]
+}

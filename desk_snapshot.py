@@ -17,6 +17,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 SCHEMA = "paper-desk.v1"
+SCHEMA_V2 = "paper-desk.v2"
+ACCEPTED_SCHEMAS = {SCHEMA, SCHEMA_V2}
 STARTING_EQUITY = 1000.0
 MSK = timezone(timedelta(hours=3))
 MAX_OPENS = 30
@@ -77,8 +79,32 @@ HASH_EXCLUDE = frozenset(
 
 OPEN_KEYS = ("token", "size_usd", "entry", "mark", "unrealized", "opened_at")
 CLOSE_KEYS = ("token", "realized", "outcome", "exits", "closed_at")
+# Optional, and only when the source row actually carries them.
+# Missing labels stay missing so unlabeled history is not reclassified.
+TIER_KEYS = (
+    "risk_tier",
+    "unverified_risks",
+    "position_pct",
+    "evidence_at",
+    "quote_observed_at",
+    "wallet_trade_observed_at",
+    "batch_id",
+    "policy_id",
+)
+RISK_TIERS = {"experimental_unverified", "ordinary"}
+UNVERIFIED_RISKS = (
+    "sell_execution_not_simulated",
+    "creator_history_incomplete",
+)
+EVIDENCE_STAMP_KEYS = (
+    "sell_execution_not_simulated",
+    "creator_history_incomplete",
+    "quote",
+    "wallet_trade",
+)
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$")
+_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,48}$")
 _EXIT_RE = re.compile(r"^[a-z0-9_]{1,40}$")
 _REASON_RE = re.compile(r"[A-Za-z0-9 .,_:+-]{1,80}")
 _ISO_RE = re.compile(
@@ -244,6 +270,64 @@ def _pick_time(equity: dict, risk: dict, positions: dict) -> str | None:
     return None
 
 
+def _public_id(value) -> str | None:
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not _ID_RE.fullmatch(text) or _dirty(text) or ".." in text or "/" in text or "\\" in text:
+        return None
+    return text
+
+
+def _evidence_stamps(value) -> dict[str, str] | str | None:
+    """Keep exact ISO timestamps. Drop paths, URLs, and unknown keys."""
+    if isinstance(value, str):
+        return _stamp(value)
+    if not isinstance(value, dict):
+        return None
+    cleaned: dict[str, str] = {}
+    for key in EVIDENCE_STAMP_KEYS:
+        stamp = _stamp(value.get(key))
+        if stamp:
+            cleaned[key] = stamp
+    return cleaned or None
+
+
+def _tier_fields(row: dict) -> dict:
+    extra: dict = {}
+    tier = row.get("risk_tier")
+    if isinstance(tier, str) and tier in RISK_TIERS:
+        extra["risk_tier"] = tier
+    risks = []
+    raw_risks = row.get("unverified_risks")
+    if isinstance(raw_risks, list):
+        for item in raw_risks:
+            if item in UNVERIFIED_RISKS and item not in risks:
+                risks.append(item)
+    if risks:
+        extra["unverified_risks"] = risks
+    pct = _finite(row.get("position_pct"), 4)
+    if pct is not None and 0 <= pct <= 100:
+        extra["position_pct"] = int(pct) if float(pct).is_integer() else pct
+    evidence = _evidence_stamps(row.get("evidence_at"))
+    if evidence:
+        extra["evidence_at"] = evidence
+    for key in ("quote_observed_at", "wallet_trade_observed_at"):
+        stamp = _stamp(row.get(key))
+        if stamp:
+            extra[key] = stamp
+    for key in ("batch_id", "policy_id"):
+        ident = _public_id(row.get(key))
+        if ident:
+            extra[key] = ident
+    return extra
+
+
+def _with_tier(base: dict, source: dict) -> dict:
+    base.update(_tier_fields(source))
+    return base
+
+
 def _opens(positions: dict) -> list[dict]:
     rows = positions.get("open")
     if rows is None:
@@ -266,14 +350,17 @@ def _opens(positions: dict) -> list[dict]:
         if unrealized is None:
             raise ValueError("open position unrealized pnl is invalid")
         cleaned.append(
-            {
-                "token": token,
-                "size_usd": size,
-                "entry": entry,
-                "mark": mark,
-                "unrealized": unrealized,
-                "opened_at": _stamp(row.get("opened_at") or row.get("ts")),
-            }
+            _with_tier(
+                {
+                    "token": token,
+                    "size_usd": size,
+                    "entry": entry,
+                    "mark": mark,
+                    "unrealized": unrealized,
+                    "opened_at": _stamp(row.get("opened_at") or row.get("ts")),
+                },
+                row,
+            )
         )
     return cleaned
 
@@ -297,13 +384,16 @@ def _closes(risk: dict) -> list[dict]:
                 if isinstance(item, str) and _EXIT_RE.fullmatch(item) and not _dirty(item):
                     exits.append(item)
             rows.append(
-                {
-                    "token": _token(row.get("token")),
-                    "realized": realized,
-                    "outcome": outcome,
-                    "exits": exits,
-                    "closed_at": _stamp(row.get("closed_at") or row.get("ts")),
-                }
+                _with_tier(
+                    {
+                        "token": _token(row.get("token")),
+                        "realized": realized,
+                        "outcome": outcome,
+                        "exits": exits,
+                        "closed_at": _stamp(row.get("closed_at") or row.get("ts")),
+                    },
+                    row,
+                )
             )
         return list(reversed(rows))
 
@@ -323,13 +413,16 @@ def _closes(risk: dict) -> list[dict]:
             else []
         )
         rows.append(
-            {
-                "token": _token(row.get("token")),
-                "realized": realized,
-                "outcome": "win" if realized > 0 else "loss" if realized < 0 else "flat",
-                "exits": exits,
-                "closed_at": _stamp(row.get("ts") or row.get("closed_at")),
-            }
+            _with_tier(
+                {
+                    "token": _token(row.get("token")),
+                    "realized": realized,
+                    "outcome": "win" if realized > 0 else "loss" if realized < 0 else "flat",
+                    "exits": exits,
+                    "closed_at": _stamp(row.get("ts") or row.get("closed_at")),
+                },
+                row,
+            )
         )
     return list(reversed(rows))
 
@@ -396,12 +489,16 @@ def build_snapshot(state_dir: Path, now: datetime | None = None) -> dict:
         source_age = int((published - parse_time(source_updated_at)).total_seconds())
 
     opens = _opens(positions)
+    closes = _closes(risk)
     book = "open" if opens else "flat"
     pnl = round(eq - STARTING_EQUITY, 6)
     pnl_pct = round(((eq / STARTING_EQUITY) - 1.0) * 100.0, 4)
+    tiered = any(set(row) - set(OPEN_KEYS) for row in opens) or any(
+        set(row) - set(CLOSE_KEYS) for row in closes
+    )
 
     doc = {
-        "schema": SCHEMA,
+        "schema": SCHEMA_V2 if tiered else SCHEMA,
         "mode": mode,
         "simulation": mode == "paper",
         "live": live,
@@ -425,7 +522,7 @@ def build_snapshot(state_dir: Path, now: datetime | None = None) -> dict:
         "book": book,
         "open_count": len(opens),
         "open": opens,
-        "recent_closes": _closes(risk),
+        "recent_closes": closes,
         "agents": [dict(row) for row in AGENTS],
         "source_updated_at": source_updated_at,
         "source_age_at_publish_sec": source_age,
@@ -438,6 +535,54 @@ def build_snapshot(state_dir: Path, now: datetime | None = None) -> dict:
     return doc
 
 
+def _validate_row(row: dict, base: tuple[str, ...]) -> bool:
+    if not isinstance(row, dict):
+        raise ValueError("trade row is invalid")
+    keys = tuple(row.keys())
+    if keys[: len(base)] != base:
+        raise ValueError("trade row keys mismatch")
+    optional = keys[len(base) :]
+    allowed = tuple(key for key in TIER_KEYS if key in row)
+    if optional != allowed:
+        raise ValueError("trade row tier keys mismatch")
+    if "risk_tier" in row and row["risk_tier"] not in RISK_TIERS:
+        raise ValueError("risk tier is not a known label")
+    if "unverified_risks" in row:
+        risks = row["unverified_risks"]
+        if (
+            not isinstance(risks, list)
+            or not risks
+            or any(item not in UNVERIFIED_RISKS for item in risks)
+            or len(risks) != len(set(risks))
+        ):
+            raise ValueError("unverified risks are not known labels")
+    if "position_pct" in row:
+        pct = row["position_pct"]
+        if isinstance(pct, bool) or _finite(pct) is None or not 0 <= float(pct) <= 100:
+            raise ValueError("position_pct is invalid")
+    if "evidence_at" in row:
+        evidence = row["evidence_at"]
+        if isinstance(evidence, str):
+            if parse_time(evidence) is None:
+                raise ValueError("evidence timestamp is invalid")
+        elif isinstance(evidence, dict):
+            if tuple(evidence.keys()) != tuple(
+                key for key in EVIDENCE_STAMP_KEYS if key in evidence
+            ):
+                raise ValueError("evidence keys are invalid")
+            if not evidence or any(parse_time(value) is None for value in evidence.values()):
+                raise ValueError("evidence timestamp is invalid")
+        else:
+            raise ValueError("evidence timestamp is invalid")
+    for key in ("quote_observed_at", "wallet_trade_observed_at"):
+        if key in row and parse_time(row[key]) is None:
+            raise ValueError("evidence timestamp is invalid")
+    for key in ("batch_id", "policy_id"):
+        if key in row and _public_id(row[key]) != row[key]:
+            raise ValueError("public id is invalid")
+    return bool(optional)
+
+
 def validate_public_snapshot(doc: dict) -> None:
     if not isinstance(doc, dict):
         raise ValueError("snapshot is not an object")
@@ -445,7 +590,7 @@ def validate_public_snapshot(doc: dict) -> None:
         extra = set(doc) - set(ROOT_KEYS)
         missing = [key for key in ROOT_KEYS if key not in doc]
         raise ValueError(f"snapshot keys mismatch missing={missing} extra={sorted(extra)}")
-    if doc["schema"] != SCHEMA:
+    if doc["schema"] not in ACCEPTED_SCHEMAS:
         raise ValueError("unexpected schema")
     if doc["mode"] not in {"paper", "live", "unknown"}:
         raise ValueError("unexpected mode")
@@ -490,20 +635,23 @@ def validate_public_snapshot(doc: dict) -> None:
         raise ValueError("open_count does not match open positions")
     if doc["book"] != ("open" if doc["open"] else "flat"):
         raise ValueError("book does not match open positions")
+    tiered = False
     for row in doc["open"]:
-        if not isinstance(row, dict) or tuple(row.keys()) != OPEN_KEYS:
-            raise ValueError("open position keys mismatch")
+        tiered = _validate_row(row, OPEN_KEYS) or tiered
         if row["token"] == "" or _dirty(str(row["token"])):
             raise ValueError("open token is invalid")
     if not isinstance(doc["recent_closes"], list) or len(doc["recent_closes"]) > MAX_CLOSES:
         raise ValueError("recent closes are invalid")
     for row in doc["recent_closes"]:
-        if not isinstance(row, dict) or tuple(row.keys()) != CLOSE_KEYS:
-            raise ValueError("close keys mismatch")
+        tiered = _validate_row(row, CLOSE_KEYS) or tiered
         if row["outcome"] not in {"win", "loss", "flat"}:
             raise ValueError("close outcome is invalid")
         if not isinstance(row["exits"], list):
             raise ValueError("close exits are invalid")
+    if tiered and doc["schema"] != SCHEMA_V2:
+        raise ValueError("tier fields require schema paper-desk.v2")
+    if not tiered and doc["schema"] != SCHEMA:
+        raise ValueError("schema paper-desk.v2 requires a labeled tier row")
     if doc["agents"] != [dict(row) for row in AGENTS]:
         raise ValueError("desk roles were modified")
     if parse_time(doc["published_at"]) is None:
