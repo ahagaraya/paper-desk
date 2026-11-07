@@ -42,7 +42,7 @@
       "qty": 1086.736504,
       "remaining_cost_usd": 9.94,
       "mark_at": "2026-11-07T21:23:52+03:00",
-      "mark_status": "fresh",
+      "mark_status": "stale",
       "mark_source": "recorded_market_mark"
     }
   ],
@@ -155,8 +155,8 @@
     }
   ],
   "source_updated_at": "2026-11-07T21:20:20+03:00",
-  "source_age_at_publish_sec": 315,
-  "published_at": "2026-11-07T21:25:35+03:00",
-  "content_hash": "0ac514ebf02647535b862bad421cda5d82f023b30e759a43245649b2f891084e",
+  "source_age_at_publish_sec": 648,
+  "published_at": "2026-11-07T21:31:08+03:00",
+  "content_hash": "351d02ea0d0cf0afcd037dfac01e8e10db75d031c0d91b8267ecea1f82a80dd3",
   "generated_by": "publish_data.py"
 }
