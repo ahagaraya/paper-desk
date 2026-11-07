@@ -1,28 +1,51 @@
 {
-  "schema": "paper-desk.v1",
+  "schema": "paper-desk.v2",
   "mode": "paper",
   "simulation": true,
   "live": false,
   "currency": "USD",
   "starting_equity": 1000.0,
-  "equity": 994.359205,
-  "cash": 994.359205,
-  "pnl_since_start": -5.640795,
-  "pnl_since_start_pct": -0.5641,
+  "equity": 994.149844,
+  "cash": 984.419205,
+  "pnl_since_start": -5.850156,
+  "pnl_since_start_pct": -0.585,
   "realized": -5.640795,
-  "unrealized": 0.0,
+  "unrealized": -0.209361,
   "wins": 3,
   "losses": 4,
   "closed_trades": 7,
   "wl": "3/4",
   "peak_equity": 1004.583077,
-  "drawdown_from_peak_pct": -1.0177,
+  "drawdown_from_peak_pct": -1.0386,
   "max_drawdown_pct": 1.1488,
   "halt_new_entries": false,
   "halt_reasons": [],
-  "book": "flat",
-  "open_count": 0,
-  "open": [],
+  "book": "open",
+  "open_count": 1,
+  "open": [
+    {
+      "token": "COGE",
+      "size_usd": 9.94,
+      "entry": 0.009146651432,
+      "mark": 0.008954,
+      "unrealized": -0.209361,
+      "opened_at": "2026-11-07T19:54:05+03:00",
+      "risk_tier": "experimental_unverified",
+      "unverified_risks": [
+        "sell_execution_not_simulated",
+        "creator_history_incomplete"
+      ],
+      "position_pct": 1,
+      "evidence_at": "2026-11-07T19:53:57+03:00",
+      "batch_id": "exp_20261107T195044MSK",
+      "position_id": "paper-COGE-2026-11-07T195405+0300",
+      "qty": 1086.736504,
+      "remaining_cost_usd": 9.94,
+      "mark_at": "2026-11-07T21:09:43+03:00",
+      "mark_status": "fresh",
+      "mark_source": "recorded_market_mark"
+    }
+  ],
   "recent_closes": [
     {
       "token": "BAGEL",
@@ -131,9 +154,9 @@
       "role": "coordination"
     }
   ],
-  "source_updated_at": "2026-11-07T11:15:03+03:00",
-  "source_age_at_publish_sec": 31004,
-  "published_at": "2026-11-07T19:51:47+03:00",
-  "content_hash": "71e2bb0e5be3907aa4066ee014c09892abe09460782d4f6342fc5dcd40c25358",
+  "source_updated_at": "2026-11-07T20:02:55+03:00",
+  "source_age_at_publish_sec": 4071,
+  "published_at": "2026-11-07T21:10:46+03:00",
+  "content_hash": "b31e75aad47dcf7346fd8e869ee3ebdd0cd3177bf709d4a2fc04a8e0126b6e8c",
   "generated_by": "publish_data.py"
 }
